@@ -17,6 +17,14 @@ $(document).ready(function() {
     controller
   });
 
+  contextualImageShare({
+    triggers: ".contextual-image",
+    controller,
+    ad: ".sliding-ad",
+    share_banner: ".share-block"
+  });
+
+
   endOfArticleShare({
     controller,
     end_elem:     "#end-of-article",
@@ -43,22 +51,41 @@ function adBannerAtBeginning(options) {
 
 function contextualImageShare(options) {
   const triggers = options.triggers;
-  const top = options.top;
-  const top_display = options.top_display;
-  const bottom = options.bottom;
-  const bottom_display = options.bottom_display;
   const controller = options.controller;
+  const ad = options.ad;
+  const share_banner = options.share_banner;
+  let tween1 = new TimelineMax()
+    .add(TweenMax.to(ad, 0.2, tweenParams(false)))
+    .add(TweenMax.to(share_banner, 0.5, tweenParams(true)));
+  let tween2 = new TimelineMax()
+    .add(TweenMax.to(share_banner, 0.2, tweenParams(false)))
+    .add(TweenMax.to(ad, 0.5, tweenParams(true)));
   $(triggers).each( function (j){
+    // Top
     let scene = new ScrollMagic.Scene();
-    populateTop(scene, top, top_display, controller, this);
+    scene
+      .triggerElement(this)
+      .offset(0)
+      .triggerHook(1)
+      .setTween(tween1)
+      .addTo(controller)
+      .addIndicators();
+
+    // Bottom
     scene = new ScrollMagic.Scene();
-    populateBottom(scene, bottom, bottom_display, controller, this);
+    console.log(share_banner);
+    scene
+      .triggerElement(this)
+      .offset($(this).height() - 10)
+      .triggerHook(0)
+      .setTween(tween2)
+      .addTo(controller)
+      .addIndicators();
   });
 }
 
 function endOfArticleShare(options) {
   const end_elem = options.end_elem;
-  console.log("end: ", end_elem);
   const controller = options.controller;
   const ad = options.ad;
   const share_banner = options.share_banner;
@@ -99,8 +126,6 @@ function populateTop(scene, elem, display, controller, block) {
   scene
     .triggerElement(block)
     .triggerHook(1)
-  //.offset(-50)
-  //.duration(60)
     .setTween(tween)
     .addTo(controller)
     .addIndicators();
