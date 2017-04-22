@@ -1,4 +1,5 @@
-$(() => {
+$(document).ready(function() {
+window.scrollTo(0, 0);
   /*
   const controller = new ScrollMagic.Controller();
   const tween0 = TweenMax.to('.sliding-ad', 0.5, {
@@ -28,18 +29,38 @@ $(() => {
   });
   */
   let last_p = $(".article-body p").last();
+  const controller = new ScrollMagic.Controller();
+
+  adBannerAtBeginning({
+    controller,
+    start_elem: $('.article-content').children()[0],
+    ad: ".sliding-ad"
+  });
+
   blockAdScroller({
     triggers:       [".advert-placeholder", ".advert-placeholder-2"],
     top:            [".sliding-ad", ".sliding-ad"],
     top_display:    [false, false],
     bottom:         [".sliding-ad", ".sliding-ad"],
     bottom_display: [true, true],
-    parent: "body"
+    controller
   });
 });
 
-function addBannerAtBeginning(options) {
-
+function adBannerAtBeginning(options) {
+  const start_elem = options.start_elem;
+  //start_elem.css("font-color", "red");
+  console.log(start_elem);
+  const controller = options.controller;
+  const ad = options.ad;
+  let scene = new ScrollMagic.Scene();
+  let tween = TweenMax.to(ad, 0.5, tweenParams(true));
+  scene
+    .triggerElement(start_elem)
+    .triggerHook(0)
+    .setTween(tween)
+    .addTo(controller)
+    .addIndicators();
 }
 
 function blockAdScroller(options) {
@@ -48,7 +69,7 @@ function blockAdScroller(options) {
   const top_display = options.top_display;
   const bottom = options.bottom;
   const bottom_display = options.bottom_display;
-  const controller = new ScrollMagic.Controller();
+  const controller = options.controller;
 
   triggers.forEach( function(curr, index){
     if(typeof curr === "string") {
@@ -69,8 +90,6 @@ function blockAdScroller(options) {
     }
   });
 }
-
-
 
 
 function populateTop(scene, elem, display, controller, block) {
