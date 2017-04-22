@@ -1,55 +1,32 @@
 $(document).ready(function() {
-window.scrollTo(0, 0);
-  /*
-  const controller = new ScrollMagic.Controller();
-  const tween0 = TweenMax.to('.sliding-ad', 0.5, {
-    backgroundColor: 'rgb(255, 39, 46)',
-    bottom: -50
-
-  });
-  const tween1 = TweenMax.to('.sliding-ad', 0.5, {
-    backgroundColor: 'rgb(0, 39, 46)',
-    bottom: 0
-
-  });
-
-  $('.advert-placeholder').each(function(index) {
-    let scene = new ScrollMagic.Scene({
-      triggerElement: this,
-      triggerHook: 1,
-      offset: -40,
-      duration: 40
-    })
-      .setTween(eval("tween" + index))
-      .addTo(controller);
-
-  // Add debug indicators fixed on right side
-    scene.addIndicators();
-    console.log(index, scene.triggerHook());
-  });
-  */
-  let last_p = $(".article-body p").last();
-  const controller = new ScrollMagic.Controller();
+  const controller = new ScrollMagic.Controller({container: ".mobile-container"});
+  controller.scrollTo("body");
 
   adBannerAtBeginning({
     controller,
-    start_elem: $('.article-content').children()[0],
-    ad: ".sliding-ad"
+    start_elem: "#start-of-article",
+    ad:         ".sliding-ad"
   });
 
   blockAdScroller({
-    triggers:       [".advert-placeholder", ".advert-placeholder-2"],
-    top:            [".sliding-ad", ".sliding-ad"],
-    top_display:    [false, false],
-    bottom:         [".sliding-ad", ".sliding-ad"],
-    bottom_display: [true, true],
+    triggers:       ".advert-placeholder",
+    top:            ".sliding-ad",
+    top_display:    false,
+    bottom:         ".sliding-ad",
+    bottom_display: true,
     controller
+  });
+
+  endOfArticleShare({
+    controller,
+    end_elem:     "#end-of-article",
+    ad:           ".sliding-ad",
+    share_banner: ".share-block"
   });
 });
 
 function adBannerAtBeginning(options) {
   const start_elem = options.start_elem;
-  //start_elem.css("font-color", "red");
   console.log(start_elem);
   const controller = options.controller;
   const ad = options.ad;
@@ -57,7 +34,42 @@ function adBannerAtBeginning(options) {
   let tween = TweenMax.to(ad, 0.5, tweenParams(true));
   scene
     .triggerElement(start_elem)
-    .triggerHook(0)
+    .triggerHook(0.1)
+    .setTween(tween)
+    .addTo(controller)
+    .duration(100)
+    .addIndicators();
+}
+
+function contextualImageShare(options) {
+  const triggers = options.triggers;
+  const top = options.top;
+  const top_display = options.top_display;
+  const bottom = options.bottom;
+  const bottom_display = options.bottom_display;
+  const controller = options.controller;
+  $(triggers).each( function (j){
+    let scene = new ScrollMagic.Scene();
+    populateTop(scene, top, top_display, controller, this);
+    scene = new ScrollMagic.Scene();
+    populateBottom(scene, bottom, bottom_display, controller, this);
+  });
+}
+
+function endOfArticleShare(options) {
+  const end_elem = options.end_elem;
+  console.log("end: ", end_elem);
+  const controller = options.controller;
+  const ad = options.ad;
+  const share_banner = options.share_banner;
+  let scene = new ScrollMagic.Scene();
+  let tween = new TimelineMax()
+    .add(TweenMax.to(ad, 0.2, tweenParams(false)))
+    .add(TweenMax.to(share_banner, 0.5, tweenParams(true)));
+  scene
+    .triggerElement(end_elem)
+    .offset(-150)
+    .triggerHook(1)
     .setTween(tween)
     .addTo(controller)
     .addIndicators();
@@ -70,24 +82,13 @@ function blockAdScroller(options) {
   const bottom = options.bottom;
   const bottom_display = options.bottom_display;
   const controller = options.controller;
+  $(triggers).each( function (j){
+    let scene = new ScrollMagic.Scene();
+    populateTop(scene, top, top_display, controller, this);
+    console.log(this);
 
-  triggers.forEach( function(curr, index){
-    if(typeof curr === "string") {
-      $(curr).each( function (j){
-        let scene = new ScrollMagic.Scene();
-        populateTop(scene, top[index], top_display[index], controller, this);
-
-        scene = new ScrollMagic.Scene();
-        populateBottom(scene, bottom[index], bottom_display[index], controller, this);
-      });
-    } else {
-      let _this = curr;
-      let scene = new ScrollMagic.Scene();
-      populateTop(scene, top[index], top_display[index], controller, _this);
-
-      scene = new ScrollMagic.Scene();
-      populateBottom(scene, bottom[index], bottom_display[index], controller, _this);
-    }
+    scene = new ScrollMagic.Scene();
+    populateBottom(scene, bottom, bottom_display, controller, this);
   });
 }
 
@@ -98,8 +99,8 @@ function populateTop(scene, elem, display, controller, block) {
   scene
     .triggerElement(block)
     .triggerHook(1)
-    //.offset(-50)
-    //.duration(60)
+  //.offset(-50)
+  //.duration(60)
     .setTween(tween)
     .addTo(controller)
     .addIndicators();
@@ -111,8 +112,8 @@ function populateBottom(scene, elem, display, controller, block) {
   scene
     .triggerElement(block)
     .triggerHook(0)
-    .offset($(block).height())
-    //.duration(60)
+    .offset($(block).height() - 10)
+  //.duration(60)
     .setTween(tween)
     .addTo(controller)
     .addIndicators();

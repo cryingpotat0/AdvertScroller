@@ -1,3 +1,10 @@
+html, body {
+  max-width: 100%;
+  max-height: 100%;
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
 p {
   font-size: 20px;
   color: black;
@@ -5,18 +12,30 @@ p {
   text-align: justify;
 }
 
-.advert-placeholder, .advert-placeholder-2 {
+.styled-div {
+  border-radius: 10px;
+  padding: 5px;
+  text-align: center;
+}
+
+.advert-placeholder, .contextual-image, .random-content {
   width:80%;
   margin-left:10%;
+  margin-top: 10px;
+  margin-bottom: 10px;
   display: block;
   float: auto;
   height: 250px;
+  text-align: center;
   border: 1px solid black;
 }
 
 .mobile-container {
-  padding: 0 10px;
+  padding: 20px 10px;
+  height: 100vh;
+  overflow: scroll;
 }
+
 
 .vjs-poster {
   width: 100%;
@@ -36,13 +55,55 @@ p {
   position: fixed;
   border: 1px solid black;
   height: 50px;
-  width: 100vw;
+  width: 100%;
+  text-align: center;
+}
+
+.sliding-ad {
   background-color: #ccc;
 }
 
 .share-block {
   bottom: -50px;
-  background-color: red;
-  z-index: 1000;
+  background-color: #3366cc;
+  color: white;
+  z-index: 10;
 }
 
+.instructions {
+  position: absolute;
+  right: 100px;
+  border: 1px solid black;
+  top: 10%;
+  width: 400px;
+  padding: 20px;
+  text-align: justify;
+}
+
+.random-content {
+  height: 500px;
+  background-color: #ccc;
+}
+
+@media (min-width: 500px) {
+  .mobile-container {
+    /* Since this is a mobile demo, set it to mobile size */
+    position: fixed;
+    width: 400px;
+    height: 100vh;
+    border: 3px solid black;
+    left: 30px;
+    bottom: 0;
+  }
+  .sliding-ad, .share-block {
+    width: 400px ;
+    left: 30px ;
+  }
+}
+
+@media (max-width: 500px) {
+  .instructions {
+    right: -500px;
+    position: fixed;
+  }
+}
