@@ -14,4 +14,5 @@ There are 4 contexts in which different sticky footers slide in and out
       end of the article. In this case the share banner can be used to share the article as a 
       whole.
 
+All of these are easy to use with different kinds of images and advertisements as long as the divs in question have a common class!
 
