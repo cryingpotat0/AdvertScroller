@@ -49,6 +49,7 @@ function populateScene(scene, trigger, hook, tween, controller, offset) {
     .setTween(tween)
     .addTo(controller)
     .offset(offset)
+    .duration(100)
     //.addIndicators();
 }
 
@@ -88,6 +89,7 @@ function contextualImageShare(options) {
 
     let top_scene = new ScrollMagic.Scene();
     populateScene(top_scene, this, 1, tween1, controller, 0);
+    top_scene.duration(150);
     let _this = this;
     top_scene.on("start", (event) => {
       banner_update(event, "FORWARD", "REVERSE", $(_this).find('img:first').attr("src"))
@@ -99,6 +101,7 @@ function contextualImageShare(options) {
     bottom_scene.on("start", (event) => {
       banner_update(event, "REVERSE", "FORWARD", $(_this).find('img:first').attr("src"))
     });
+    bottom_scene.duration(150);
 
   });
 }
