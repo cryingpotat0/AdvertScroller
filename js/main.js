@@ -1,5 +1,8 @@
 $(document).ready(function() {
-  const controller = new ScrollMagic.Controller({container: ".mobile-container"});
+  const controller = new ScrollMagic.Controller({
+    container: ".mobile-container", 
+    refreshInterval: 1000
+  });
   controller.scrollTo("body");
 
   adBannerAtBeginning({
@@ -10,10 +13,7 @@ $(document).ready(function() {
 
   blockAdScroller({
     triggers:       ".advert-placeholder",
-    top:            ".sliding-ad",
-    top_display:    false,
-    bottom:         ".sliding-ad",
-    bottom_display: true,
+    ad:             ".sliding-ad",
     controller
   });
 
@@ -35,17 +35,20 @@ $(document).ready(function() {
 
 function adBannerAtBeginning(options) {
   const start_elem = options.start_elem;
-  console.log(start_elem);
   const controller = options.controller;
   const ad = options.ad;
   let scene = new ScrollMagic.Scene();
   let tween = TweenMax.to(ad, 0.5, tweenParams(true));
+  populateScene(scene, start_elem, 0, tween, controller, 0);
+}
+
+function populateScene(scene, trigger, hook, tween, controller, offset) {
   scene
-    .triggerElement(start_elem)
-    .triggerHook(0.1)
+    .triggerElement(trigger)
+    .triggerHook(hook)
     .setTween(tween)
     .addTo(controller)
-    .duration(100)
+    .offset(offset)
     .addIndicators();
 }
 
@@ -54,33 +57,49 @@ function contextualImageShare(options) {
   const controller = options.controller;
   const ad = options.ad;
   const share_banner = options.share_banner;
-  let tween1 = new TimelineMax()
-    .add(TweenMax.to(ad, 0.2, tweenParams(false)))
-    .add(TweenMax.to(share_banner, 0.5, tweenParams(true)));
-  let tween2 = new TimelineMax()
-    .add(TweenMax.to(share_banner, 0.2, tweenParams(false)))
-    .add(TweenMax.to(ad, 0.5, tweenParams(true)));
-  $(triggers).each( function (j){
-    // Top
-    let scene = new ScrollMagic.Scene();
-    scene
-      .triggerElement(this)
-      .offset(0)
-      .triggerHook(1)
-      .setTween(tween1)
-      .addTo(controller)
-      .addIndicators();
 
-    // Bottom
-    scene = new ScrollMagic.Scene();
-    console.log(share_banner);
-    scene
-      .triggerElement(this)
-      .offset($(this).height() - 10)
-      .triggerHook(0)
-      .setTween(tween2)
-      .addTo(controller)
-      .addIndicators();
+  let banner_update = function(event, firstScroll, secondScroll, url) {
+      if(event.scrollDirection === firstScroll) {
+        $(share_banner).html(
+         `<h3>
+            Share the <a href = "${url}"> image </a>!
+          </h3>`
+        );
+      }
+      else if(event.scrollDirection === secondScroll) {
+        setTimeout( () => {
+          $(share_banner).html(
+           `<h3>
+              Share the article!
+            </h3>`
+          );
+        },
+        500);
+      }
+  }
+
+  $(triggers).each( function (j){
+    let tween1 = new TimelineMax()
+      .add(TweenMax.to(ad, 0.2, tweenParams(false)))
+      .add(TweenMax.to(share_banner, 0.5, tweenParams(true)));
+    let tween2 = new TimelineMax()
+      .add(TweenMax.to(share_banner, 0.2, tweenParams(false)))
+      .add(TweenMax.to(ad, 0.5, tweenParams(true)));
+
+    let top_scene = new ScrollMagic.Scene();
+    populateScene(top_scene, this, 1, tween1, controller, 0);
+    let _this = this;
+    top_scene.on("start", (event) => {
+      banner_update(event, "FORWARD", "REVERSE", $(_this).find('img:first').attr("src"))
+    });
+    
+
+    let bottom_scene = new ScrollMagic.Scene();
+    populateScene(bottom_scene, this, 0, tween2, controller, $(this).height() - 10);
+    bottom_scene.on("start", (event) => {
+      banner_update(event, "REVERSE", "FORWARD", $(_this).find('img:first').attr("src"))
+    });
+
   });
 }
 
@@ -93,56 +112,24 @@ function endOfArticleShare(options) {
   let tween = new TimelineMax()
     .add(TweenMax.to(ad, 0.2, tweenParams(false)))
     .add(TweenMax.to(share_banner, 0.5, tweenParams(true)));
-  scene
-    .triggerElement(end_elem)
-    .offset(-150)
-    .triggerHook(1)
-    .setTween(tween)
-    .addTo(controller)
-    .addIndicators();
+  populateScene(scene, end_elem, 1, tween, controller, -150);
 }
 
 function blockAdScroller(options) {
   const triggers = options.triggers;
-  const top = options.top;
-  const top_display = options.top_display;
-  const bottom = options.bottom;
-  const bottom_display = options.bottom_display;
   const controller = options.controller;
+  const ad = options.ad;
   $(triggers).each( function (j){
-    let scene = new ScrollMagic.Scene();
-    populateTop(scene, top, top_display, controller, this);
-    console.log(this);
+    let top_scene = new ScrollMagic.Scene();
+    let tween1 = TweenMax.to(ad, 0.5, tweenParams(false));
+    populateScene(top_scene, this, 1, tween1, controller, 0);
 
-    scene = new ScrollMagic.Scene();
-    populateBottom(scene, bottom, bottom_display, controller, this);
+    let bottom_scene = new ScrollMagic.Scene();
+    let tween2 = TweenMax.to(ad, 0.5, tweenParams(true));
+    populateScene(bottom_scene, this, 0, tween2, controller, $(this).height() - 10);
   });
 }
 
-
-function populateTop(scene, elem, display, controller, block) {
-  if(elem === undefined)  return; 
-  let tween = TweenMax.to(elem, 0.5, tweenParams(display));
-  scene
-    .triggerElement(block)
-    .triggerHook(1)
-    .setTween(tween)
-    .addTo(controller)
-    .addIndicators();
-}
-
-function populateBottom(scene, elem, display, controller, block) {
-  if(elem === undefined)  return; 
-  let tween = TweenMax.to(elem, 0.5, tweenParams(display));
-  scene
-    .triggerElement(block)
-    .triggerHook(0)
-    .offset($(block).height() - 10)
-  //.duration(60)
-    .setTween(tween)
-    .addTo(controller)
-    .addIndicators();
-}
 
 function tweenParams(display) {
   if(display) {
