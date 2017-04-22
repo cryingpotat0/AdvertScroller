@@ -49,7 +49,7 @@ function populateScene(scene, trigger, hook, tween, controller, offset) {
     .setTween(tween)
     .addTo(controller)
     .offset(offset)
-    .addIndicators();
+    //.addIndicators();
 }
 
 function contextualImageShare(options) {
